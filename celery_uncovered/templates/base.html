@@ -18,10 +18,10 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 
     <!-- Your stuff: Third-party CSS libraries go here -->
-    
+
     <!-- This file stores project-specific CSS -->
     <link href="{% static 'css/project.css' %}" rel="stylesheet">
-    
+
     {% endblock %}
 
   </head>
@@ -46,20 +46,20 @@
             {% if request.user.is_authenticated %}
               <li class="nav-item">
                 {# URL provided by django-allauth/account/urls.py #}
-                <a class="nav-link" href="{% url 'users:detail' request.user.username  %}">{% trans "My Profile" %}</a>
+                <a class="nav-link" href="#">{% trans "My Profile" %}</a>
               </li>
               <li class="nav-item">
                 {# URL provided by django-allauth/account/urls.py #}
-                <a class="nav-link" href="{% url 'account_logout' %}">{% trans "Sign Out" %}</a>
+                <a class="nav-link" href="#">{% trans "Sign Out" %}</a>
               </li>
             {% else %}
               <li class="nav-item">
                 {# URL provided by django-allauth/account/urls.py #}
-                <a id="sign-up-link" class="nav-link" href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a>
+                <a id="sign-up-link" class="nav-link" href="#">{% trans "Sign Up" %}</a>
               </li>
               <li class="nav-item">
                 {# URL provided by django-allauth/account/urls.py #}
-                <a id="log-in-link" class="nav-link" href="{% url 'account_login' %}">{% trans "Sign In" %}</a>
+                <a id="log-in-link" class="nav-link" href="#">{% trans "Sign In" %}</a>
               </li>
             {% endif %}
           </ul>
@@ -96,11 +96,11 @@
       <!-- Your stuff: Third-party javascript libraries go here -->
 
       <!-- place project specific Javascript in this file -->
-      
+
       <script src="{% static 'js/project.js' %}"></script>
-      
+
 
     {% endblock javascript %}
   </body>
 </html>
- 
+

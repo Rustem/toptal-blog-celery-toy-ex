@@ -33,9 +33,9 @@ DJANGO_APPS = [
     # Default Django apps:
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
+    # 'django.contrib.sessions',
+    #'django.contrib.sites',
+    # 'django.contrib.messages',
     'django.contrib.staticfiles',
 
     # Useful template tags:
@@ -45,16 +45,13 @@ DJANGO_APPS = [
     'django.contrib.admin',
 ]
 THIRD_PARTY_APPS = [
-    'crispy_forms',  # Form layouts
-    'allauth',  # registration
-    'allauth.account',  # registration
-    'allauth.socialaccount',  # registration
+
 ]
 
 # Apps specific for this project go here.
 LOCAL_APPS = [
     # custom users app
-    'celery_uncovered.users.apps.UsersConfig',
+
     # Your stuff: custom apps go here
 ]
 
@@ -68,7 +65,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    #'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -76,7 +73,6 @@ MIDDLEWARE = [
 # MIGRATIONS CONFIGURATION
 # ------------------------------------------------------------------------------
 MIGRATION_MODULES = {
-    'sites': 'celery_uncovered.contrib.sites.migrations'
 }
 
 # DEBUG
@@ -109,9 +105,12 @@ MANAGERS = ADMINS
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='postgres:///celery_uncovered'),
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'celery_uncovered_dev',
+    }
 }
-DATABASES['default']['ATOMIC_REQUESTS'] = True
+
 
 
 # GENERAL CONFIGURATION
@@ -173,9 +172,6 @@ TEMPLATES = [
     },
 ]
 
-# See: http://django-crispy-forms.readthedocs.io/en/latest/install.html#template-packs
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
-
 # STATIC FILE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
@@ -225,51 +221,13 @@ PASSWORD_HASHERS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
 # ------------------------------------------------------------------------------
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-# AUTHENTICATION CONFIGURATION
-# ------------------------------------------------------------------------------
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-
-# Some really nice defaults
-ACCOUNT_AUTHENTICATION_METHOD = 'username'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-
-ACCOUNT_ALLOW_REGISTRATION = env.bool('DJANGO_ACCOUNT_ALLOW_REGISTRATION', True)
-ACCOUNT_ADAPTER = 'celery_uncovered.users.adapters.AccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'celery_uncovered.users.adapters.SocialAccountAdapter'
-
-# Custom user app defaults
-# Select the correct user model
-AUTH_USER_MODEL = 'users.User'
-LOGIN_REDIRECT_URL = 'users:redirect'
-LOGIN_URL = 'account_login'
-
-# SLUGLIFIER
-AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
 ########## CELERY
+
 INSTALLED_APPS += ['celery_uncovered.taskapp.celery.CeleryConfig']
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='django://')
 if CELERY_BROKER_URL == 'django://':
-    CELERY_RESULT_BACKEND = 'redis://'
+    CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
 else:
     CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 ########## END CELERY

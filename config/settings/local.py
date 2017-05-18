@@ -49,6 +49,7 @@ INTERNAL_IPS = ['127.0.0.1', '10.0.2.2', ]
 
 import socket
 import os
+
 # tricks to have debug toolbar when developing with docker
 if os.environ.get('USE_DOCKER') == 'yes':
     ip = socket.gethostbyname(socket.gethostname())

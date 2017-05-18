@@ -12,10 +12,6 @@ urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     url(settings.ADMIN_URL, admin.site.urls),
 
-    # User management
-    url(r'^users/', include('celery_uncovered.users.urls', namespace='users')),
-    url(r'^accounts/', include('allauth.urls')),
-
     # Your stuff: custom urls includes go here
 
 

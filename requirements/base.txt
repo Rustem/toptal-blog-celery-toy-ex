@@ -8,46 +8,24 @@ wheel==0.29.0
 # Bleeding edge Django
 django==1.10.7 # pyup: >=1.10,<1.11
 
-# Configuration
-django-environ==0.4.3
-whitenoise==3.3.0
-
-
-# Forms
-django-braces==1.11.0
-django-crispy-forms==1.6.1
 
 # Models
 django-model-utils==3.0.0
 
-# Images
-Pillow==4.1.1
 
 # Password storage
 argon2-cffi==16.3.0
 
-# For user registration, either via email or social
-# Well-built with regular release cycles!
-django-allauth==0.32.0
-
-
-# Python-PostgreSQL Database Adapter
-psycopg2==2.7.1
-
-# Unicode slugification
-awesome-slugify==1.6.5
 
 # Time zones support
 pytz==2017.2
 
-# Redis support
-django-redis==4.8.0
-redis>=2.10.5
 
 
-celery==3.1.25
-
-
+celery==4.0.2
 
 
 # Your custom requirements go here
+
+
+django-environ==0.4.3
