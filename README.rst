@@ -30,7 +30,7 @@ advanced
 celery_tricks
 ^^^^^^^
 
-    contains generic examples of extending default `celery.app.Task` for:
+    contains generic examples of extending default ```celery.app.Task``` for:
         - verbose logging
         - scope injection
         - freezing task
