@@ -1,7 +1,9 @@
 Celery Uncovered
 ================
 
-A short description of the project.
+Supporting project for my toptal article - URL
+
+This repository is intended to help the beginners better understand celery by usecases. It also shows some really nice (undocumented) tricks that could give lots of benefits while developing celery-based projects.
 
 .. image:: https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg
      :target: https://github.com/pydanny/cookiecutter-django/
