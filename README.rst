@@ -13,12 +13,29 @@ This repository is intended to help the beginners better understand celery by us
 :License: MIT
 
 
-Settings
---------
 
-Moved to settings_.
+Django-Applications
+------------
 
-.. _settings: http://cookiecutter-django.readthedocs.io/en/latest/settings.html
+toyex
+^^^^^
+
+    contains widely used (simple) examples of using celery to solve background tasks
+
+advanced
+^^^^^^
+
+    contains generic patterns of using celery to facilitate workflow execution and many others
+
+celery_tricks
+^^^^^^^
+
+    contains generic examples of extending default `celery.app.Task` for:
+        - verbose logging
+        - scope injection
+        - freezing task
+
+
 
 Basic Modules
 --------------
