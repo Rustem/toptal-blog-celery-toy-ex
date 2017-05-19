@@ -23,6 +23,7 @@ pytz==2017.2
 
 
 celery==4.0.2
+django-celery-results==1.0.1
 
 
 # Your custom requirements go here
