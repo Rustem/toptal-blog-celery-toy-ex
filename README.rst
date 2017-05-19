@@ -86,7 +86,9 @@ Running tests with py.test
 
 ::
 
-  $ py.test
+  $ chmod +x utility/unittest.sh
+  $ ./utility/unittest.sh
+
 
 Live reloading and Sass CSS compilation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
