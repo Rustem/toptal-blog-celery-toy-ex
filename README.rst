@@ -76,10 +76,7 @@ Test coverage
 
 To run the tests, check your test coverage, and generate an HTML coverage report::
 
-    $ coverage run manage.py test
-    $ coverage html
-    $ open htmlcov/index.html
-
+    $ not configured yet
 
 Running tests with py.test
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
