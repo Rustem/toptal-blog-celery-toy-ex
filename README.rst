@@ -22,12 +22,12 @@ toyex
 
     contains widely used (simple) examples of using celery to solve background tasks
 
-advanced
+advex
 ^^^^^^
 
     contains generic patterns of using celery to facilitate workflow execution and many others
 
-celery_tricks
+tricks
 ^^^^^^^
 
     contains generic examples of extending default ```celery.app.Task``` and some undocument tricks such as:
