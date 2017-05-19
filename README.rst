@@ -51,7 +51,7 @@ To run a celery worker:
 .. code-block:: bash
 
     cd celery_uncovered
-    celery -A celery_uncovered.taskapp worker -l info
+    celery -A celery_uncovered worker -l info
 
 Please note: For Celery's import magic to work, it is important *where* the celery commands are run. If you are in the same folder with *manage.py*, you should be right.
 
@@ -61,12 +61,14 @@ Email Server
 
 In development, it is often nice to be able to see emails that are being sent from your application. For that reason local SMTP server `MailHog`_ with a web interface is available as docker container.
 
-.. _mailhog: https://github.com/mailhog/MailHog
-
-Container mailhog will start automatically when you will run all docker containers.
-Please check `cookiecutter-django Docker documentation`_ for more details how to start all containers.
 
 With MailHog running, to view messages that are sent by your application, open your browser and go to ``http://127.0.0.1:8025``
+
+How to deploy and run it via docker you can refer to its [README.md](docker/mailhog/README.md).
+
+Further configuration options are available in `MailHog`_.
+
+.. _mailhog: https://github.com/mailhog/MailHog
 
 
 Test coverage

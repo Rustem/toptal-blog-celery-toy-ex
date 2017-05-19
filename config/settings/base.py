@@ -43,6 +43,9 @@ DJANGO_APPS = [
 
     # Admin
     'django.contrib.admin',
+
+    # celery
+    'django_celery_results',
 ]
 THIRD_PARTY_APPS = [
 
@@ -53,6 +56,7 @@ LOCAL_APPS = [
     # custom users app
 
     # Your stuff: custom apps go here
+    'celery_uncovered.toyex'
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -224,14 +228,14 @@ PASSWORD_HASHERS = [
 
 ########## CELERY
 
-INSTALLED_APPS += ['celery_uncovered.taskapp.celery.CeleryConfig']
-CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='django://')
-if CELERY_BROKER_URL == 'django://':
-    CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
-else:
-    CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-########## END CELERY
+# INSTALLED_APPS += ['celery_uncovered.taskapp.celery.CeleryConfig']
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='amqp://guest:guest@localhost:5672//')
+CELERY_RESULT_BACKEND = 'django-db+sqlite:///results.sqlite'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 
+
+########## END CELERY
 
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'

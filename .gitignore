@@ -56,7 +56,7 @@ node_modules/
 .sass-cache
 
 # virtual environments
-.env
+env
 
 # User-uploaded media
 celery_uncovered/media/
