@@ -9,8 +9,11 @@ Local settings
 - Add django-extensions as app
 """
 
-from .base import *  # noqa
+from .base import *
+import environ
 
+
+env = environ.Env()
 # DEBUG
 # ------------------------------------------------------------------------------
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
@@ -73,6 +76,8 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 ########## CELERY
 # In development, all tasks will be executed locally by blocking until the task returns
 CELERY_TASK_ALWAYS_EAGER = True
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='amqp://guest:guest@localhost:5672//')
+CELERY_RESULT_BACKEND = 'django-db+sqlite:///results.sqlite'
 ########## END CELERY
 
 # Your local stuff: Below this line define 3rd party library settings

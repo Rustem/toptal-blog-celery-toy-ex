@@ -229,8 +229,6 @@ PASSWORD_HASHERS = [
 ########## CELERY
 
 # INSTALLED_APPS += ['celery_uncovered.taskapp.celery.CeleryConfig']
-CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='amqp://guest:guest@localhost:5672//')
-CELERY_RESULT_BACKEND = 'django-db+sqlite:///results.sqlite'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
