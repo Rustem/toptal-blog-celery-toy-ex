@@ -33,6 +33,56 @@ EMAIL_PORT = 1025
 EMAIL_HOST = env('EMAIL_HOST', default='mailhog')
 
 
+# Logging settings
+# ------------------------------------------------------------------------------
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'django.server': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[%(server_time)s] %(message)s',
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        },
+        'django.server': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'django.server',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_true'],
+            'class': 'celery_uncovered.toyex.handlers.admin_email.ToyexAdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'INFO',
+        },
+        'django.server': {
+            'handlers': ['django.server'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    }
+}
+
+
 # CACHING
 # ------------------------------------------------------------------------------
 CACHES = {
@@ -75,9 +125,10 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 ########## CELERY
 # In development, all tasks will be executed locally by blocking until the task returns
-CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = env.bool('CELERY_TASK_ALWAYS_EAGER', default=True)
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='amqp://guest:guest@localhost:5672//')
 CELERY_RESULT_BACKEND = 'django-db+sqlite:///results.sqlite'
+
 ########## END CELERY
 
 # Your local stuff: Below this line define 3rd party library settings

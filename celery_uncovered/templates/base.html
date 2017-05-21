@@ -43,7 +43,7 @@
             <li class="nav-item">
               <a class="nav-link" href="{% url 'about' %}">About</a>
             </li>
-            {% if request.user.is_authenticated %}
+            {% if request.user.is_authenticated %} {% sadasds %}
               <li class="nav-item">
                 {# URL provided by django-allauth/account/urls.py #}
                 <a class="nav-link" href="#">{% trans "My Profile" %}</a>
