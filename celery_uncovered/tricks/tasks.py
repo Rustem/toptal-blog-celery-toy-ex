@@ -72,5 +72,15 @@ Implementation details:
 3. Tiny payment dispatcher which is responsible for assigning PENDING to execute_payment task and set exec identifier so that it will be executed only once.
 
 
+Bonus tasks:
 
+1. freeze to access task result in indirect parent.
+
+a = A.s()
+a_result = a.freeze()
+
+workflow = (a | B.s() | C.s(a_result.as_tuple()))
+workflow.delay()
+
+https://github.com/celery/celery/issues/3666
 """
