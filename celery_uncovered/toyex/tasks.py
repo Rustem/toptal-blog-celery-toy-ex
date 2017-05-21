@@ -37,7 +37,7 @@ Bonus tasks for readers:
 2. What if we need to produce csv per language?
 hint: For that you need to use celery.canvas.group and modify `produce_hot_repo_report_task(language/topic, ref_date, period='week')`
 
-3. Probably your client wants it to be automatically callable each day at 00:00 and generate report for previous date.
+3. Probably your client wants it to be automatically callable each day at 00:00, generate report for previous date and send it to dummy email.
 hint: periodic tasks
 
 Required Libraries:
