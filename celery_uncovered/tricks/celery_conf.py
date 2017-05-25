@@ -47,5 +47,4 @@ def configure_task_logging(instance=None, **kwargs):
 
         LOG_CONFIG['handlers'][task] = task_handler
         LOG_CONFIG['loggers'][task] = task_logger
-    print LOG_CONFIG
     logging.config.dictConfig(LOG_CONFIG)

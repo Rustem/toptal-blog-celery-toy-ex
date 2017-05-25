@@ -82,3 +82,4 @@ CELERY_RESULT_BACKEND = 'django-db+sqlite:///results.sqlite'
 
 # Your local stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
+DEFAULT_SCENARIO_ID = 1
