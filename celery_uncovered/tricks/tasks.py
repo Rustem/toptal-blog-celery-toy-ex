@@ -66,6 +66,7 @@ Bonus tasks
 @shared_task(bind=True, base=ScopeBasedTask)
 def read_scenario_file_task(self, **kwargs):
     fixture_parts = ["scenarios", "sc_%i.json" % kwargs['scenario_id']]
+    self.log_msg("Called with scenario_id=%s", kwargs['scenario_id'])
     return read_fixture(*fixture_parts)
 
 r"""

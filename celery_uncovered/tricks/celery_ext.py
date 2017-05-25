@@ -20,7 +20,7 @@ class LoggingTask(current_app.Task):
         self.log.debug(msg, *msg_args)
 
 
-class ScopeBasedTask(current_app.Task):
+class ScopeBasedTask(LoggingTask):
     abstract = True
     ignore_result = False
     default_scenario_id = DEFAULT_SCENARIO_ID
