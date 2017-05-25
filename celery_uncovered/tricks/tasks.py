@@ -1,5 +1,6 @@
 from celery import shared_task
 from .celery_ext import LoggingTask
+from .exceptions import BadConfigured
 
 r"""
 Responsible: Rustem Kamun <xepa4ep>
@@ -94,3 +95,8 @@ def add(self, a, b):
     c = a + b
     self.log_msg("Result of %i + %i = %i", a, b, c)
     return c
+
+
+@shared_task(bind=True, base=LoggingTask)
+def failing_task(self):
+    raise BadConfigured("Please fix me!!!")

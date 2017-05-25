@@ -48,3 +48,18 @@ def configure_task_logging(instance=None, **kwargs):
         LOG_CONFIG['handlers'][task] = task_handler
         LOG_CONFIG['loggers'][task] = task_logger
     logging.config.dictConfig(LOG_CONFIG)
+
+
+@signals.task_failure.connect
+def log_task_fail(sender=None, task_id=None, exception=None, **kwargs):
+    if not hasattr(sender, 'log_msg'):
+        return
+    sender.log_msg('Task %s with args=%s and kwargs=%s failed.', task_id, list(kwargs['args']), kwargs['kwargs'])
+    sender.log.exception(exception)
+
+
+@signals.task_postrun.connect
+def log_task_success(sender=None, task_id=None, retval=None, state=None, **kwargs):
+    if not hasattr(sender, 'log_msg'):
+        return
+    sender.log_msg('Task %s executed with state=%s.', str(task_id), str(state))
