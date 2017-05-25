@@ -75,7 +75,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 ########## CELERY
 # In development, all tasks will be executed locally by blocking until the task returns
-CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = False
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='amqp://guest:guest@localhost:5672//')
 CELERY_RESULT_BACKEND = 'django-db+sqlite:///results.sqlite'
 ########## END CELERY

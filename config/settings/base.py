@@ -56,7 +56,8 @@ LOCAL_APPS = [
     # custom users app
 
     # Your stuff: custom apps go here
-    'celery_uncovered.toyex'
+    'celery_uncovered.toyex',
+    'celery_uncovered.tricks'
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

@@ -8,11 +8,11 @@ from celery import Celery, signals
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')
 # django.setup()
 
-from django.conf import settings  # noqa
-
 app = Celery('celery_uncovered')
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
+
+import celery_uncovered.tricks.celery_conf

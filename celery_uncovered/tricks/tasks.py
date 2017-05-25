@@ -1,3 +1,6 @@
+from celery import shared_task
+from .celery_ext import LoggingTask
+
 r"""
 Responsible: Rustem Kamun <xepa4ep>
 
@@ -84,3 +87,10 @@ workflow.delay()
 
 https://github.com/celery/celery/issues/3666
 """
+
+
+@shared_task(bind=True, base=LoggingTask)
+def add(self, a, b):
+    c = a + b
+    self.log_msg("Result of %i + %i = %i", a, b, c)
+    return c
