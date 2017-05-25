@@ -20,7 +20,8 @@ argon2-cffi==16.3.0
 # Time zones support
 pytz==2017.2
 
-
+# Make requests
+requests==2.14.2
 
 celery==4.0.2
 django-celery-results==1.0.1
