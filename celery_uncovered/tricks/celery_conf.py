@@ -20,7 +20,7 @@ def configure_task_logging(instance=None, **kwargs):
     default_handler = {
         'level': 'DEBUG',
         'filters': None,
-        'class': 'logging.FileHandler',
+        'class': 'logging.handlers.WatchedFileHandler',
         'filename': ''
     }
     default_logger = {
@@ -47,4 +47,5 @@ def configure_task_logging(instance=None, **kwargs):
 
         LOG_CONFIG['handlers'][task] = task_handler
         LOG_CONFIG['loggers'][task] = task_logger
+    print LOG_CONFIG
     logging.config.dictConfig(LOG_CONFIG)
