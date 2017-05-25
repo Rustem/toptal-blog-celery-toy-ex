@@ -20,7 +20,7 @@ def configure_task_logging(instance=None, **kwargs):
     default_handler = {
         'level': 'DEBUG',
         'filters': None,
-        'class': 'logging.handlers.WatchedFileHandler',
+        'class': 'logging.FileHandler',
         'filename': ''
     }
     default_logger = {
