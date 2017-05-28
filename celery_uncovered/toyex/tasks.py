@@ -12,7 +12,6 @@ def send_test_email_task():
         fail_silently=False,)
 
 
-
 r"""
 Responsible: Sattar Stamkukov <devishot>
 
@@ -78,4 +77,6 @@ Required Libraries:
 """
 
 
-
+@shared_task
+def report_error_task(subject, message, *args, **kwargs):
+    mail_admins(subject, message, *args, **kwargs)
