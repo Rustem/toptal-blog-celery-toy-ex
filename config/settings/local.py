@@ -135,3 +135,4 @@ CELERY_RESULT_BACKEND = 'django-db+sqlite:///results.sqlite'
 # Your local stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
 DEFAULT_SCENARIO_ID = 1
+GITHUB_OAUTH = '4bd43b3d0e4b4ec03f6f95b9cc11b4b09cbb0dd3'
