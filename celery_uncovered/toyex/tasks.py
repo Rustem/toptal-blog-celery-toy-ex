@@ -3,8 +3,9 @@ from __future__ import absolute_import, unicode_literals
 import requests
 from celery import shared_task, group
 from django.core.mail import mail_admins
-from django.conf import settings
 from .utils import make_csv
+from .models import Repository
+import datetime
 
 
 @shared_task
@@ -61,36 +62,56 @@ def fetch_hot_repos(since, per_page, page):
         params=payload,
         headers=headers,
         timeout=(connect_timeout, read_timeout))
-    repos = r.json()[u'items']
-    return repos
-
-
-# @todo support mixed
-# if datetime => str
-
+    items = r.json()[u'items']
+    return [Repository(item) for item in items]
 
 @shared_task
 def produce_hot_repo_report_task(ref_date):
-    # 1. fetch
-    job = group((fetch_hot_repos.s(ref_date, 100, i + 1) for i in range(5)))
+    # 1. parse date
+    str_date = None
+    if ref_date in ('day', 'week', 'month'):
+        now = datetime.date.today()
+        delta = None
+        if ref_date is 'day':
+            delta = datetime.timedelta(days=1)
+        elif ref_date is 'week':
+            delta = datetime.timedelta(weeks=1)
+        else:
+            delta = datetime.timedelta(days=30)
+        str_date = (now - delta).isoformat()
+
+    elif type(ref_date) is str:
+        str_date = ref_date
+
+    elif type(ref_date) is datetime.date:
+        str_date = ref_date.isoformat()
+
+    # 2. fetch and join
+    job = group([
+        fetch_hot_repos.s(ref_date, 100, 1),
+        fetch_hot_repos.s(ref_date, 100, 2),
+        fetch_hot_repos.s(ref_date, 100, 3),
+        fetch_hot_repos.s(ref_date, 100, 4),
+        fetch_hot_repos.s(ref_date, 100, 5)
+    ])
     result = job.apply_async()
-    repos = reduce(lambda acc, res: acc + res, result.get(), [])
+    all_repos = []
+    for repo in result.get():
+        all_repos += repo
 
-    # 2. group by language
-    def group_by_lang(repos):
-        data = {}
-        for repo in repos:
-            lang = repo[u'language'] or u'unknown'
-            name = repo[u'full_name']
-            if lang in data:
-                data[lang].append(name)
-            else:
-                data[lang] = [name]
-        return data
+    # 3. group by language
+    grouped_repos = {}
+    for repo in all_repos:
+        if repo.language in grouped_repos:
+            grouped_repos[repo.language].append(repo.name)
+        else:
+            grouped_repos[repo.language] = [repo.name]
 
-    grouped_repos = group_by_lang(repos)
-    # 3. create csv
-    lines = map(lambda lang: [lang] + grouped_repos[lang], sorted(grouped_repos.keys()))
+    # 4. create csv
+    lines = []
+    for lang in sorted(grouped_repos.keys()):
+        lines.append([lang] + grouped_repos[lang])
+
     filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=ref_date)
     return make_csv(filename, lines)
 
