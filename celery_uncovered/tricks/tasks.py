@@ -1,3 +1,7 @@
+from celery import shared_task
+from .celery_ext import LoggingTask, ScopeBasedTask
+from .utils import read_fixture
+
 r"""
 Responsible: Rustem Kamun <xepa4ep>
 
@@ -25,6 +29,13 @@ Hint: Clue within appropriate log handlers.
 """
 
 
+@shared_task(bind=True, base=LoggingTask)
+def add(self, a, b):
+    c = a + b
+    self.log_msg("Result of %i + %i = %i", a, b, c)
+    return c
+
+
 r"""
 Responsible: Rustem Kamun <xepa4ep>
 
@@ -50,6 +61,12 @@ Bonus tasks
 
 2. Allow this type of tasks to be loggable as well. You can reuse functionality of verbose logging trick.
 """
+
+
+@shared_task(bind=True, base=ScopeBasedTask)
+def read_scenario_file_task(self, **kwargs):
+    fixture_parts = ["scenarios", "sc_%i.json" % kwargs['scenario_id']]
+    return read_fixture(*fixture_parts)
 
 r"""
 Responsible: Rustem Kamun <xepa4ep>

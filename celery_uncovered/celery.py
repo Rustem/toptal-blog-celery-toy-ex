@@ -7,7 +7,8 @@ import django
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')
-django.setup()
+
+# django.setup()
 
 app = Celery('celery_uncovered')
 
@@ -15,3 +16,5 @@ app = Celery('celery_uncovered')
 # pickle the object when using Windows.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
+
+import celery_uncovered.tricks.celery_conf

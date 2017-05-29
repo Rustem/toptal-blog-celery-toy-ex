@@ -62,16 +62,6 @@ def produce_hot_repo_report_task(ref_date):
     return make_csv.delay(filename, lines)
 
 
-
-
-
-
-
-
-
-
-
-
 r"""
 Responsible: Sattar Stamkukov <devishot>
 
@@ -135,3 +125,7 @@ Required Libraries:
     mailhog
     pytest
 """
+
+@shared_task
+def report_error_task(subject, message, *args, **kwargs):
+    mail_admins(subject, message, *args, **kwargs)
