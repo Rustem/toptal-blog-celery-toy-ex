@@ -1,13 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.core.mail import mail_admins
-from django.conf import settings
-from celery import shared_task, group
-
 import requests
-import csv
+from celery import shared_task, group
+from django.core.mail import mail_admins
+from .utils import make_csv
+from .models import Repository
+import datetime
 
-from celery_uncovered.celery import app as celery_app
 
 @shared_task
 def send_test_email_task():
@@ -15,52 +14,6 @@ def send_test_email_task():
         'MailHog Test',
         'Hello from Mailhog.',
         fail_silently=False,)
-
-@celery_app.task
-def fetch_hot_repos(since, per_page, page):
-    payload = {
-        'sort': 'stars', 'order': 'desc', 'q': 'created:>={date}'.format(date=since),
-        'per_page': per_page, 'page': page,
-        'access_token': settings.GITHUB_OAUTH }
-    headers = { 'Accept': 'application/vnd.github.v3+json' }
-    connect_timeout, read_timeout = 5.0, 30.0
-    r = requests.get('https://api.github.com/search/repositories',
-        params=payload, headers=headers,
-        timeout=(connect_timeout, read_timeout) )
-    repos = r.json()[u'items']
-    return repos
-
-@celery_app.task
-def make_csv(filename, lines):
-    with open(filename, 'wb') as csvfile:
-        trending_csv = csv.writer(csvfile)
-        for line in lines:
-            trending_csv.writerow(line)
-    return filename
-
-@celery_app.task
-def produce_hot_repo_report_task(ref_date):
-    # 1. fetch
-    job = group( map(lambda i: fetch_hot_repos.s(ref_date, 100, i + 1), range(5)) )
-    result = job.apply_async()
-    repos = reduce(lambda acc, res: acc + res, result.get(), [])
-    # 2. group by language
-    def group_by_lang(repos):
-        data = {}
-        for repo in repos:
-            lang = repo[u'language'] or u'unknown'
-            name = repo[u'full_name']
-            if lang in data:
-                data[lang].append(name)
-            else:
-                data[lang] = [name]
-        return data
-    grouped_repos = group_by_lang(repos)
-    # 3. create csv
-    lines = map(lambda lang: [lang] + grouped_repos[lang], sorted(grouped_repos.keys()) )
-    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=ref_date)
-    return make_csv.delay(filename, lines)
-
 
 r"""
 Responsible: Sattar Stamkukov <devishot>
@@ -94,8 +47,74 @@ Required Libraries:
     django.core.mail
 """
 
+@shared_task
+def fetch_hot_repos(since, per_page, page):
+    payload = {
+        'sort': 'stars', 'order': 'desc', 'q': 'created:>={date}'.format(date=since),
+        'per_page': per_page, 'page': page,
+        'access_token': settings.GITHUB_OAUTH}
+    headers = {'Accept': 'application/vnd.github.v3+json'}
+    connect_timeout, read_timeout = 5.0, 30.0
+    r = requests.get(
+        'https://api.github.com/search/repositories',
+        params=payload,
+        headers=headers,
+        timeout=(connect_timeout, read_timeout))
+    items = r.json()[u'items']
+    return [Repository(item) for item in items]
 
-r"""
+@shared_task
+def produce_hot_repo_report_task(ref_date):
+    # 1. parse date
+    str_date = None
+    if ref_date in ('day', 'week', 'month'):
+        now = datetime.date.today()
+        delta = None
+        if ref_date is 'day':
+            delta = datetime.timedelta(days=1)
+        elif ref_date is 'week':
+            delta = datetime.timedelta(weeks=1)
+        else:
+            delta = datetime.timedelta(days=30)
+        str_date = (now - delta).isoformat()
+
+    elif type(ref_date) is str:
+        str_date = ref_date
+
+    elif type(ref_date) is datetime.date:
+        str_date = ref_date.isoformat()
+
+    # 2. fetch and join
+    job = group([
+        fetch_hot_repos.s(ref_date, 100, 1),
+        fetch_hot_repos.s(ref_date, 100, 2),
+        fetch_hot_repos.s(ref_date, 100, 3),
+        fetch_hot_repos.s(ref_date, 100, 4),
+        fetch_hot_repos.s(ref_date, 100, 5)
+    ])
+    result = job.apply_async()
+    all_repos = []
+    for repo in result.get():
+        all_repos += repo
+
+    # 3. group by language
+    grouped_repos = {}
+    for repo in all_repos:
+        if repo.language in grouped_repos:
+            grouped_repos[repo.language].append(repo.name)
+        else:
+            grouped_repos[repo.language] = [repo.name]
+
+    # 4. create csv
+    lines = []
+    for lang in sorted(grouped_repos.keys()):
+        lines.append([lang] + grouped_repos[lang])
+
+    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=ref_date)
+    return make_csv(filename, lines)
+
+
+"""
 Responsible: Mailubayev Yernar <mailubai@gmail.com>
 
 Create a logging handler that will be able to track Server errors (50X) and report them to admins through via celery. I advice to thoroughly understand https://docs.djangoproject.com/en/1.11/howto/error-reporting/
