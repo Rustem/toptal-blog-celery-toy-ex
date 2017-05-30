@@ -10,3 +10,6 @@ def make_csv(filename, lines):
         for line in lines:
             trending_csv.writerow(line)
     return filename
+
+def is_exists(filename):
+    return os.path.isfile(filename)

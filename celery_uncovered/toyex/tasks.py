@@ -4,7 +4,7 @@ import requests
 from celery import shared_task, group
 from django.core.mail import mail_admins
 from django.conf import settings
-from .utils import make_csv
+from .utils import make_csv, is_exists
 from .models import Repository
 import datetime
 
@@ -85,6 +85,11 @@ def produce_hot_repo_report_task(ref_date):
     elif type(ref_date) is datetime.date:
         str_date = ref_date.isoformat()
 
+    # 1b. check if results exist
+    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=str_date)
+    if is_exists(filename):
+        return filename
+
     # 2. fetch and join
     job = group([
         fetch_hot_repos.s(str_date, 100, 1),
@@ -110,8 +115,6 @@ def produce_hot_repo_report_task(ref_date):
     lines = []
     for lang in sorted(grouped_repos.keys()):
         lines.append([lang] + grouped_repos[lang])
-
-    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=str_date)
     return make_csv(filename, lines)
 
 
