@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import requests
 from celery import shared_task, group
 from django.core.mail import mail_admins
+from django.conf import settings
 from .utils import make_csv
 from .models import Repository
 import datetime
@@ -86,11 +87,11 @@ def produce_hot_repo_report_task(ref_date):
 
     # 2. fetch and join
     job = group([
-        fetch_hot_repos.s(ref_date, 100, 1),
-        fetch_hot_repos.s(ref_date, 100, 2),
-        fetch_hot_repos.s(ref_date, 100, 3),
-        fetch_hot_repos.s(ref_date, 100, 4),
-        fetch_hot_repos.s(ref_date, 100, 5)
+        fetch_hot_repos.s(str_date, 100, 1),
+        fetch_hot_repos.s(str_date, 100, 2),
+        fetch_hot_repos.s(str_date, 100, 3),
+        fetch_hot_repos.s(str_date, 100, 4),
+        fetch_hot_repos.s(str_date, 100, 5)
     ])
     result = job.apply_async()
     all_repos = []
@@ -110,7 +111,7 @@ def produce_hot_repo_report_task(ref_date):
     for lang in sorted(grouped_repos.keys()):
         lines.append([lang] + grouped_repos[lang])
 
-    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=ref_date)
+    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=str_date)
     return make_csv(filename, lines)
 
 
