@@ -4,9 +4,8 @@ import requests
 from celery import shared_task, group
 from django.core.mail import mail_admins
 from django.conf import settings
-from .utils import make_csv, is_exists
+from .utils import make_csv, is_exists, strf_date
 from .models import Repository
-import datetime
 
 
 @shared_task
@@ -67,36 +66,20 @@ def fetch_hot_repos(since, per_page, page):
 @shared_task
 def produce_hot_repo_report_task(ref_date):
     # 1. parse date
-    str_date = None
-    if ref_date in ('day', 'week', 'month'):
-        now = datetime.date.today()
-        delta = None
-        if ref_date is 'day':
-            delta = datetime.timedelta(days=1)
-        elif ref_date is 'week':
-            delta = datetime.timedelta(weeks=1)
-        else:
-            delta = datetime.timedelta(days=30)
-        str_date = (now - delta).isoformat()
-
-    elif type(ref_date) is str:
-        str_date = ref_date
-
-    elif type(ref_date) is datetime.date:
-        str_date = ref_date.isoformat()
+    ref_date_str = strf_date(ref_date)
 
     # 1b. check if results exist
-    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=str_date)
+    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=ref_date_str)
     if is_exists(filename):
         return filename
 
     # 2. fetch and join
     job = group([
-        fetch_hot_repos.s(str_date, 100, 1),
-        fetch_hot_repos.s(str_date, 100, 2),
-        fetch_hot_repos.s(str_date, 100, 3),
-        fetch_hot_repos.s(str_date, 100, 4),
-        fetch_hot_repos.s(str_date, 100, 5)
+        fetch_hot_repos.s(ref_date_str, 100, 1),
+        fetch_hot_repos.s(ref_date_str, 100, 2),
+        fetch_hot_repos.s(ref_date_str, 100, 3),
+        fetch_hot_repos.s(ref_date_str, 100, 4),
+        fetch_hot_repos.s(ref_date_str, 100, 5)
     ])
     result = job.apply_async()
     all_repos = []

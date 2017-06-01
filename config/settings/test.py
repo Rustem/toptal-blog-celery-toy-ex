@@ -59,3 +59,6 @@ TEMPLATES[0]['OPTIONS']['loaders'] = [
         'django.template.loaders.app_directories.Loader',
     ], ],
 ]
+
+DEFAULT_SCENARIO_ID = 1
+
