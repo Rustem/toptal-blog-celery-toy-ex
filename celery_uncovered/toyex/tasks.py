@@ -1,10 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
 import requests
+import os
+import csv
 from celery import shared_task, group
 from django.core.mail import mail_admins
 from django.conf import settings
-from .utils import make_csv, is_exists, strf_date
+from .utils import is_exists, strf_date
 from .models import Repository
 
 
@@ -48,9 +50,23 @@ Required Libraries:
 """
 
 @shared_task
-def fetch_hot_repos(since, per_page, page):
+def make_csv(filename, lines):
+    dirname = os.path.dirname(filename)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    with open(filename, 'wb') as csvfile:
+        trending_csv = csv.writer(csvfile)
+        for line in lines:
+            trending_csv.writerow(line)
+    return filename
+
+@shared_task
+def fetch_hot_repos(language, since, per_page, page):
+    query = 'created:>={date}'.format(date=since)
+    if language:
+        query += ' language:{lang}'.format(lang=language)
     payload = {
-        'sort': 'stars', 'order': 'desc', 'q': 'created:>={date}'.format(date=since),
+        'sort': 'stars', 'order': 'desc', 'q': query,
         'per_page': per_page, 'page': page,
         'access_token': settings.GITHUB_OAUTH}
     headers = {'Accept': 'application/vnd.github.v3+json'}
@@ -66,7 +82,7 @@ def fetch_hot_repos(since, per_page, page):
 @shared_task
 def produce_hot_repo_report_task(ref_date):
     # 1. parse date
-    ref_date_str = strf_date(ref_date)
+    ref_date_str = strf_date(None, ref_date)
 
     # 1b. check if results exist
     filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=ref_date_str)
@@ -75,11 +91,11 @@ def produce_hot_repo_report_task(ref_date):
 
     # 2. fetch and join
     job = group([
-        fetch_hot_repos.s(ref_date_str, 100, 1),
-        fetch_hot_repos.s(ref_date_str, 100, 2),
-        fetch_hot_repos.s(ref_date_str, 100, 3),
-        fetch_hot_repos.s(ref_date_str, 100, 4),
-        fetch_hot_repos.s(ref_date_str, 100, 5)
+        fetch_hot_repos.s(None, ref_date_str, 100, 1),
+        fetch_hot_repos.s(None, ref_date_str, 100, 2),
+        fetch_hot_repos.s(None, ref_date_str, 100, 3),
+        fetch_hot_repos.s(None, ref_date_str, 100, 4),
+        fetch_hot_repos.s(None, ref_date_str, 100, 5)
     ])
     result = job.apply_async()
     all_repos = []
@@ -98,7 +114,39 @@ def produce_hot_repo_report_task(ref_date):
     lines = []
     for lang in sorted(grouped_repos.keys()):
         lines.append([lang] + grouped_repos[lang])
-    return make_csv(filename, lines)
+    result = make_csv.delay(filename, lines)
+    return result.get()
+
+
+@shared_task
+def produce_hot_repo_report_task_for_languages(languages, ref_date):
+    # 1. parse date
+    ref_date_str = strf_date(None, ref_date)
+
+    # 1b. generate filenames, skip if exists
+    filenames_by_lang = {}
+    for language in languages:
+        filename = '{media}/github-hot-repos-{date}-{lang}.csv'.format(
+            media=settings.MEDIA_ROOT,
+            date=ref_date_str,
+            lang=language)
+        if not is_exists(filename):
+            filenames_by_lang[language] = filename
+
+    # 2. fetch and join
+    languages = filenames_by_lang.keys()
+    job_fetch = group( [fetch_hot_repos.s(lang, ref_date_str, 100, 1) for lang in languages] )
+    result = job_fetch.apply_async()
+    repo_names_by_lang = {}
+    for index, repos in enumerate(result.get()):
+        language = languages[index]
+        repo_names_by_lang[language] = [repo.name for repo in repos]
+
+    # 3. create csv per language
+    filename_repos = [(filenames_by_lang[lang], repo_names_by_lang[lang]) for lang in languages]
+    job_store = group( [make_csv.s(filename, [repo_names]) for filename, repo_names in filename_repos] )
+    result = job_store.apply_async()
+    return result.get()
 
 
 """
