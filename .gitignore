@@ -22,6 +22,7 @@ sftp-config.json
 # Basics
 *.py[cod]
 __pycache__
+*.pid
 
 # Logs
 logs
@@ -66,4 +67,3 @@ celerybeat-schedule.db
 staticfiles/
 
 .cache/
-

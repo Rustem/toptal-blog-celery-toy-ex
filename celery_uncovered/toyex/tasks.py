@@ -4,7 +4,7 @@ import requests
 import os
 import csv
 from celery import shared_task, group
-from django.core.mail import mail_admins
+from django.core.mail import mail_admins, EmailMessage
 from django.conf import settings
 from .utils import is_exists, strf_date
 from .models import Repository
@@ -80,48 +80,51 @@ def fetch_hot_repos(language, since, per_page, page):
     return [Repository(item) for item in items]
 
 @shared_task
-def produce_hot_repo_report_task(ref_date):
-    # 1. parse date
-    ref_date_str = strf_date(None, ref_date)
+def fetch_hot_repos_group(group_params):
+    job = group( [fetch_hot_repos.s(*params) for params in group_params] )
+    result = job.apply_async()
+    return result.get()
 
-    # 1b. check if results exist
+@shared_task
+def store_hot_repos_group(repos_group, filename):
+    repos_flattened = []
+    for repo in repos_group:
+        repos_flattened += repo
+
+    reponames_by_lang = {}
+    for repo in repos_flattened:
+        if repo.language in reponames_by_lang:
+            reponames_by_lang[repo.language].append(repo.name)
+        else:
+            reponames_by_lang[repo.language] = [repo.name]
+
+    lines = []
+    for lang in sorted(reponames_by_lang.keys()):
+        lines.append([lang] + reponames_by_lang[lang])
+    result = make_csv.delay(filename, lines)
+    return result.get()
+
+@shared_task
+def produce_hot_repo_report_task(ref_date, period=None):
+    # parse date
+    ref_date_str = strf_date(period, ref_date)
+
+    # check if results exist
     filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=ref_date_str)
     if is_exists(filename):
         return filename
 
-    # 2. fetch and join
-    job = group([
-        fetch_hot_repos.s(None, ref_date_str, 100, 1),
-        fetch_hot_repos.s(None, ref_date_str, 100, 2),
-        fetch_hot_repos.s(None, ref_date_str, 100, 3),
-        fetch_hot_repos.s(None, ref_date_str, 100, 4),
-        fetch_hot_repos.s(None, ref_date_str, 100, 5)
-    ])
-    result = job.apply_async()
-    all_repos = []
-    for repo in result.get():
-        all_repos += repo
+    group_params = map(lambda i: (None, ref_date_str, 100, i), range(1, 5))
 
-    # 3. group by language
-    grouped_repos = {}
-    for repo in all_repos:
-        if repo.language in grouped_repos:
-            grouped_repos[repo.language].append(repo.name)
-        else:
-            grouped_repos[repo.language] = [repo.name]
-
-    # 4. create csv
-    lines = []
-    for lang in sorted(grouped_repos.keys()):
-        lines.append([lang] + grouped_repos[lang])
-    result = make_csv.delay(filename, lines)
+    chain = fetch_hot_repos_group.s(group_params) | store_hot_repos_group.s(filename)
+    result = chain()
     return result.get()
 
 
 @shared_task
-def produce_hot_repo_report_task_for_languages(languages, ref_date):
+def produce_hot_repo_report_task_for_languages(languages, ref_date, period=None):
     # 1. parse date
-    ref_date_str = strf_date(None, ref_date)
+    ref_date_str = strf_date(period, ref_date)
 
     # 1b. generate filenames, skip if exists
     filenames_by_lang = {}
@@ -146,6 +149,26 @@ def produce_hot_repo_report_task_for_languages(languages, ref_date):
     filename_repos = [(filenames_by_lang[lang], repo_names_by_lang[lang]) for lang in languages]
     job_store = group( [make_csv.s(filename, [repo_names]) for filename, repo_names in filename_repos] )
     result = job_store.apply_async()
+    return result.get()
+
+@shared_task
+def email_attachment_task(filename, title, emails=None):
+    if not emails:
+        emails = map(lambda x: x[1], settings.ADMINS)
+    message = EmailMessage(
+        title,
+        'With attachment',
+        'root@localhost',
+        emails
+    )
+    message.attach_file(filename)
+    message.send()
+
+@shared_task
+def send_hot_repo_daily_report_task(emails=None):
+    title = 'Daily hotrepos'
+    chain = produce_hot_repo_report_task.s(None, 'day') | email_attachment_task.s(title, emails)
+    result = chain()
     return result.get()
 
 

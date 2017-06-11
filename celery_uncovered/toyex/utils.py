@@ -18,7 +18,7 @@ def strf_date(mixed_date, ref_date=None):
             delta = datetime.timedelta(days=30)
         dt_str = (ref_date - delta).isoformat()
 
-    elif type(ref_date) is str:
+    elif type(ref_date) in (str, unicode):
         dt_str = ref_date
 
     elif type(ref_date) in (datetime.date, datetime.datetime):

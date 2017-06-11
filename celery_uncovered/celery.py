@@ -15,5 +15,11 @@ app = Celery('celery_uncovered')
 # pickle the object when using Windows.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
+app.conf.beat_schedule = {
+    'schedule-midnight-hotrepo-report': {
+        'task': 'celery_uncovered.toyex.tasks.send_hot_repo_daily_report_task',
+        'schedule': 30.0
+    },
+}
 
 import celery_uncovered.tricks.celery_conf

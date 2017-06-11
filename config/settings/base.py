@@ -8,9 +8,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 import environ
+from celery.schedules import crontab
 
 ROOT_DIR = environ.Path(__file__) - 3  # (celery_uncovered/config/settings/base.py - 3 = celery_uncovered/)
 APPS_DIR = ROOT_DIR.path('celery_uncovered')
+CONF_DIR = ROOT_DIR.path('config')
 
 # Load operating system environment variables and then prepare to use them
 env = environ.Env()
@@ -232,7 +234,8 @@ PASSWORD_HASHERS = [
 # INSTALLED_APPS += ['celery_uncovered.taskapp.celery.CeleryConfig']
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-
+CELERYBEAT_SCHEDULER = 'celery.beat:PersistentScheduler'
+CELERY_IGNORE_RESULT = True
 
 ########## END CELERY
 
