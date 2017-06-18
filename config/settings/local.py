@@ -31,7 +31,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', default='|ad(NW7~=O=5UF#q{ihH<2:-CBtafb[t8
 EMAIL_PORT = 1025
 
 EMAIL_HOST = env('EMAIL_HOST', default='mailhog')
-
+SERVER_EMAIL = 'rustem@toptal.com'
 
 # Logging settings
 # ------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_true'],  # ['require_debug_true'],
-            'class': 'celery_uncovered.toyex.log_handlers.admin_email.AdminEmailHandler'
+            'class': 'celery_uncovered.toyex.log_handlers.admin_email.AdminEmailScheduledHandler'  # AdminEmailHandler
         }
     },
     'loggers': {
@@ -125,7 +125,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 ########## CELERY
 # In development, all tasks will be executed locally by blocking until the task returns
-CELERY_TASK_ALWAYS_EAGER = env.bool('CELERY_TASK_ALWAYS_EAGER', default=True)
+CELERY_TASK_ALWAYS_EAGER = env.bool('CELERY_TASK_ALWAYS_EAGER', default=False)
 
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='amqp://guest:guest@localhost:5672//')
 CELERY_RESULT_BACKEND = 'django-db+sqlite:///results.sqlite'

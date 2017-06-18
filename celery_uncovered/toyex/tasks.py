@@ -1,10 +1,13 @@
 from __future__ import absolute_import, unicode_literals
 
 import requests
+import os
 from celery import shared_task, group
-from django.core.mail import mail_admins
+from celery.task.schedules import crontab
+from celery.decorators import periodic_task
+from django.core.mail import mail_admins, EmailMessage
 from django.conf import settings
-from .utils import make_csv
+from .utils import make_csv, make_error_file
 from .models import Repository
 import datetime
 
@@ -146,6 +149,30 @@ Required Libraries:
     pytest
 """
 
+
 @shared_task
 def report_error_task(subject, message, *args, **kwargs):
     mail_admins(subject, message, *args, **kwargs)
+
+
+@shared_task
+def create_error_file(subject, message, *args, **kwargs):
+    filename = '{media}/errors/{subject}-{date}.log'.format(media=settings.MEDIA_ROOT, subject=subject.replace('/', ' '), date=datetime.datetime.now())
+    make_error_file(filename, message)
+
+
+@periodic_task(run_every=(crontab(hour="*", minute="*", day_of_week="*")))
+def report_scheduled_error_task():
+    error_folder = '{media}/errors/'.format(media=settings.MEDIA_ROOT)
+
+    email = EmailMessage("Error report", "Scheduled error report for admin", settings.SERVER_EMAIL, [a[1] for a in settings.ADMINS])
+    email.content_subtype = "html"
+
+    errors = os.listdir(error_folder)
+    for error in errors:
+        fd = open(settings.MEDIA_ROOT + '/errors/' + error, 'r')
+        email.attach(error, fd.read(), 'text/plain')
+        fd.close()
+        os.remove(settings.MEDIA_ROOT + '/errors/' + error)
+
+    res = email.send()

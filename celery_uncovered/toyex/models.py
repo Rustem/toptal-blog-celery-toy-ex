@@ -9,3 +9,10 @@ class Repository(object):
             return getattr(self, attr)
         else:
             return getattr(self._wrapped_obj, attr)
+
+
+class ErrorRecord(object):
+    """docstring for ErrorRecord"""
+    def __init__(self, subject, message):
+        self.subject = subject
+        self.message = message
