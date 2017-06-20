@@ -1,5 +1,5 @@
 from django.utils.log import AdminEmailHandler as BaseAdminEmailHandler
-from celery_uncovered.toyex.tasks import report_error_task, create_error_file
+from celery_uncovered.toyex.tasks import report_error_task, register_error_for_admin
 
 
 class AdminEmailHandler(BaseAdminEmailHandler):
@@ -11,5 +11,4 @@ class AdminEmailHandler(BaseAdminEmailHandler):
 class AdminEmailScheduledHandler(BaseAdminEmailHandler):
 
     def send_mail(self, subject, message, *args, **kwargs):
-        print("safdsdfasdfasd")
-        create_error_file.delay(subject, message, *args, **kwargs)
+        register_error_for_admin.delay(subject, message, *args, **kwargs)

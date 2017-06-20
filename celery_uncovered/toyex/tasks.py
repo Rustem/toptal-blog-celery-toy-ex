@@ -7,9 +7,17 @@ from celery.task.schedules import crontab
 from celery.decorators import periodic_task
 from django.core.mail import mail_admins, EmailMessage
 from django.conf import settings
-from .utils import make_csv, make_error_file
-from .models import Repository
+from .utils import make_csv
+from .models import Repository, IntervalCheckpoint, CheckpointFile
 import datetime
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
+
+
+
 
 
 @shared_task
@@ -156,23 +164,38 @@ def report_error_task(subject, message, *args, **kwargs):
 
 
 @shared_task
-def create_error_file(subject, message, *args, **kwargs):
-    filename = '{media}/errors/{subject}-{date}.log'.format(media=settings.MEDIA_ROOT, subject=subject.replace('/', ' '), date=datetime.datetime.now())
-    make_error_file(filename, message)
+def register_error_for_admin(subject, message, *args, **kwargs):
+    """Registers error by storing result to a file"""
+    chk_file = CheckpointFile.error_file(subject)
+    chk_file.write(message)
 
 
 @periodic_task(run_every=(crontab(hour="*", minute="*", day_of_week="*")))
 def report_scheduled_error_task():
-    error_folder = '{media}/errors/'.format(media=settings.MEDIA_ROOT)
+    errors_content = StringIO()
+    at_least_one_flag = False
+    for chk_file in CheckpointFile.read_relevant_error_files():
+        header_text = "--" * 10 + " %s " % chk_file.filename + "--" * 10
+        # head
+        errors_content.write(header_text)
+        errors_content.write(os.linesep)
+        # body
+        errors_content.write(chk_file.read())
+        # tail
+        errors_content.write(os.linesep * 5)
+        at_least_one_flag = True
 
-    email = EmailMessage("Error report", "Scheduled error report for admin", settings.SERVER_EMAIL, [a[1] for a in settings.ADMINS])
+    if not at_least_one_flag:
+        return
+
+    email = EmailMessage(
+        subject="Error report",
+        body="Scheduled error report for admin",
+        from_email=settings.SERVER_EMAIL,
+        to=[a[1] for a in settings.ADMINS])
     email.content_subtype = "html"
+    email.attach("error_dump.log", errors_content.getvalue(), 'text/plain')
+    email.send()
 
-    errors = os.listdir(error_folder)
-    for error in errors:
-        fd = open(settings.MEDIA_ROOT + '/errors/' + error, 'r')
-        email.attach(error, fd.read(), 'text/plain')
-        fd.close()
-        os.remove(settings.MEDIA_ROOT + '/errors/' + error)
-
-    res = email.send()
+    error_dir = '{media}/errors/'.format(media=settings.MEDIA_ROOT)
+    IntervalCheckpoint.update_current(error_dir)
