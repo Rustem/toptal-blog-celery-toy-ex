@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import requests
-from celery import shared_task, group
+from celery import shared_task, group, chord
 from django.core.mail import mail_admins
 from django.conf import settings
 from .utils import make_csv, strf_date
@@ -62,26 +62,30 @@ def fetch_hot_repos(since, per_page, page):
         headers=headers,
         timeout=(connect_timeout, read_timeout))
     items = r.json()[u'items']
-    return [Repository(item) for item in items]
+    return items
 
 
-@shared_task
-def produce_hot_repo_report_task(period, ref_date=None):
+def produce_hot_repo_report(period, ref_date=None):
     # 1. parse date
     ref_date_str = strf_date(period, ref_date=ref_date)
 
     # 2. fetch and join
-    job = group([
+    fetch_jobs = group([
         fetch_hot_repos.s(ref_date_str, 100, 1),
         fetch_hot_repos.s(ref_date_str, 100, 2),
         fetch_hot_repos.s(ref_date_str, 100, 3),
         fetch_hot_repos.s(ref_date_str, 100, 4),
         fetch_hot_repos.s(ref_date_str, 100, 5)
     ])
-    result = job.apply_async()
+    return chord(fetch_jobs)(build_report_task.s(ref_date_str)).get()
+
+
+
+@shared_task
+def build_report_task(results, ref_date):
     all_repos = []
-    for repo in result.get():
-        all_repos += repo
+    for repos in results:
+        all_repos += [Repository(repo) for repo in repos]
 
     # 3. group by language
     grouped_repos = {}
@@ -96,7 +100,7 @@ def produce_hot_repo_report_task(period, ref_date=None):
     for lang in sorted(grouped_repos.keys()):
         lines.append([lang] + grouped_repos[lang])
 
-    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=ref_date_str)
+    filename = '{media}/github-hot-repos-{date}.csv'.format(media=settings.MEDIA_ROOT, date=ref_date)
     return make_csv(filename, lines)
 
 
