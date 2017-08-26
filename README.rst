@@ -98,3 +98,16 @@ Deployment
 ----------
 
 The following details how to deploy this application.
+
+Credits
+------
+
+  - Original Project
+    * `Sattar Stamkulov`_
+      contributed example
+
+    * `Mailubayev Yernar`_
+      contributed example
+
+:: _`Sattar Stamkulov`: https://github.com/devishot
+:: _`Mailubayev Yernar`: https://github.com/Mafioso
