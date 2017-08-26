@@ -1,7 +1,9 @@
 Celery Uncovered
 ================
 
-Supporting project for my toptal article - URL
+Supporting project for my `TopTal article`_.
+
+.. _`TopTal article`: https://www.toptal.com/python/orchestrating-celery-python-background-jobs
 
 This repository is intended to help the beginners better understand celery by usecases. It also shows some really nice (undocumented) tricks that could give lots of benefits while developing celery-based projects.
 
@@ -25,9 +27,9 @@ toyex
 advex
 ^^^^^^
 
-    contains generic patterns of using celery to facilitate workflow execution and many others
+    contains generic patterns of using celery to facilitate workflow execution and many others (soon)
 
-tricks
+`tricks`_
 ^^^^^^^
 
     contains generic examples of extending default ```celery.app.Task``` and some undocument tricks such as:
@@ -35,9 +37,10 @@ tricks
         - scope injection
         - freezing task
 
+.. _tricks: https://github.com/Rustem/toptal-blog-celery-toy-ex/tree/master/celery_uncovered/tricks#running-examples
 
 
-Basic Modules
+Extra Details
 --------------
 
 
@@ -70,13 +73,6 @@ Further configuration options are available in `MailHog`_.
 
 .. _mailhog: https://github.com/mailhog/MailHog
 
-
-Test coverage
-^^^^^^^^^^^^^
-
-To run the tests, check your test coverage, and generate an HTML coverage report::
-
-    $ not configured yet
 
 Running tests with py.test
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

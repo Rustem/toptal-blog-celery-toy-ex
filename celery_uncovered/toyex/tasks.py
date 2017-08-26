@@ -77,6 +77,8 @@ def produce_hot_repo_report(period, ref_date=None):
         fetch_hot_repos.s(ref_date_str, 100, 4),
         fetch_hot_repos.s(ref_date_str, 100, 5)
     ])
+    # 3. group by language and
+    # 4. create csv
     return chord(fetch_jobs)(build_report_task.s(ref_date_str)).get()
 
 
