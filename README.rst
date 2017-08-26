@@ -3,7 +3,6 @@ Celery Uncovered
 
 Supporting project for my `TopTal article`_.
 
-.. _`TopTal article`: https://www.toptal.com/python/orchestrating-celery-python-background-jobs
 
 This repository is intended to help the beginners better understand celery by usecases. It also shows some really nice (undocumented) tricks that could give lots of benefits while developing celery-based projects.
 
@@ -37,7 +36,7 @@ advex
         - scope injection
         - freezing task
 
-.. _tricks: https://github.com/Rustem/toptal-blog-celery-toy-ex/tree/master/celery_uncovered/tricks#running-examples
+
 
 
 Extra Details
@@ -71,7 +70,7 @@ How to deploy and run it via docker you can refer to its [README.md](docker/mail
 
 Further configuration options are available in `MailHog`_.
 
-.. _mailhog: https://github.com/mailhog/MailHog
+
 
 
 Running tests with py.test
@@ -88,7 +87,7 @@ Live reloading and Sass CSS compilation
 
 Moved to `Live reloading and SASS compilation`_.
 
-.. _`Live reloading and SASS compilation`: http://cookiecutter-django.readthedocs.io/en/latest/live-reloading-and-sass-compilation.html
+
 
 
 
@@ -102,12 +101,13 @@ The following details how to deploy this application.
 Credits
 ------
 
-  - Original Project
-    * `Sattar Stamkulov`_
-      contributed example
+    * `Sattar Stamkulov`_ - contributed example
 
-    * `Mailubayev Yernar`_
-      contributed example
+    * `Mailubayev Yernar`_ - contributed example
 
-:: _`Sattar Stamkulov`: https://github.com/devishot
-:: _`Mailubayev Yernar`: https://github.com/Mafioso
+.. _`TopTal article`: https://www.toptal.com/python/orchestrating-celery-python-background-jobs
+.. _tricks: https://github.com/Rustem/toptal-blog-celery-toy-ex/tree/master/celery_uncovered/tricks#running-examples
+.. _mailhog: https://github.com/mailhog/MailHog
+.. _`Live reloading and SASS compilation`: http://cookiecutter-django.readthedocs.io/en/latest/live-reloading-and-sass-compilation.html
+.. _`Sattar Stamkulov`: https://github.com/devishot
+.. _`Mailubayev Yernar`: https://github.com/Mafioso
