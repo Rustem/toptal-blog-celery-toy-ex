@@ -18,8 +18,8 @@ This repository is intended to help the beginners better understand celery by us
 Django-Applications
 ------------
 
-toyex
-^^^^^
+`toyex`_
+^^^^^^^
 
     contains widely used (simple) examples of using celery to solve background tasks
 
