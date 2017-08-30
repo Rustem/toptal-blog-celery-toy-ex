@@ -19,7 +19,7 @@ Django-Applications
 ------------
 
 `toyex`_
-^^^^^^^
+^^^^^^
 
     contains widely used (simple) examples of using celery to solve background tasks
 
@@ -107,6 +107,7 @@ Credits
 
 .. _`TopTal article`: https://www.toptal.com/python/orchestrating-celery-python-background-jobs
 .. _tricks: https://github.com/Rustem/toptal-blog-celery-toy-ex/tree/master/celery_uncovered/tricks#running-examples
+.. _toyex: https://github.com/Rustem/toptal-blog-celery-toy-ex/tree/master/celery_uncovered/toyex#running-examples
 .. _mailhog: https://github.com/mailhog/MailHog
 .. _`Live reloading and SASS compilation`: http://cookiecutter-django.readthedocs.io/en/latest/live-reloading-and-sass-compilation.html
 .. _`Sattar Stamkulov`: https://github.com/devishot
