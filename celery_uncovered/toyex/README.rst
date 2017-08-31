@@ -6,7 +6,7 @@ Fetch Github Repositories Task
 
 Uses Celery Groups for execute multiple requests to github and store report in CSV-file
 
-In order to launch and test how this task is working, first start the Celery process:
+In order to launch and check an actual behavior of the task, first start the Celery process:
 
 .. code-block:: bash
 
@@ -32,7 +32,7 @@ Finally, to see the result, navigate to the `celery_uncovered/media` directory a
     ...
 
 
-You also can test it with passing a kwarg `ref_date`. Task will fetch only repositories created after referred date:
+You also can test it by passing a kwarg `ref_date`. Task will fetch only repositories created after referred date:
 
 .. code-block:: python
 
